@@ -1,5 +1,5 @@
 /*
-	Idea: Ternary search for the answer.
+	Idea: Ternary search for the position on x- axis .
 */
 
 
