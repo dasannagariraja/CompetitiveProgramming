@@ -53,38 +53,45 @@ using namespace std;
 #define pdqueue priority_queue< int,vi ,greater< int > >
 
 //std::ios::sync_with_stdio(false);
-pii st[500005];
+pii st[100005][20];
+int n;
 int ans[100005];
 vector<pair<int,pii> >vec;
 vector<pair<int,pii> >:: iterator it;
-int build(int s,int e,int node){
-	if(s==e){
-		st[node].ff=vec[s].ff+vec[s].ss.ff-1;
-		st[node].ss=s;
-		return 0;
+int pre(){
+	pii p,p1;
+	int i,j;
+	rep(i,n-1){
+		p.ff=vec[i].ff+vec[i].ss.ff-1;
+		p.ss=i;
+		st[i][0]=p;
 	}
-	int mid=(s+e)/2;
-	build(s,mid,2*node);
-	build(mid+1,e,2*node+1);
-	st[node]=max(st[2*node],st[2*node+1]);
-	return 0;
+	p.ss=i;
+	p.ff=vec[i].ff+vec[i].ss.ff-1;
+	st[i][0]=p;
+	f(i,1,20){
+		fd(j,n-1,0){
+			if(j+(1<<(i))<n){
+				st[j][i]=max(st[j][i-1],st[j+(1<<(i-1))][i-1]);
+			}
+		}
+	}
 }
-pii query(int l,int r,int s,int e,int node){
-	if(l>e||r<s){
-		pii p;
-		p.ff=-1*inf;
-		p.ss=0;
-		return p;
+pii query(int l,int r){
+	int i;
+	pii maxx;
+	maxx.ff=-1*inf;
+	fd(i,19,0){
+		if(l+(1<<i)<=r){
+			maxx=max(maxx,st[l][i]);
+			l=l+(1<<i);
+		}
 	}
-	if(s==e){
-		return st[node];
-	}
-	int mid=(s+e)/2;
-	return max(query(l,r,s,mid,2*node),query(l,r,mid+1,e,2*node+1));
+	maxx=max(maxx,st[l][0]);
+	return maxx;
 }
 int main(){
 	std::ios::sync_with_stdio(false);
-	int n;
 	pair<int,pii>p;
 	pii val1;
 	int val,i,x,h;
@@ -94,7 +101,7 @@ int main(){
 		vec.pb(mp(x,mp(h,i)));
 	}
 	sort(all(vec));
-	build(0,n-1,1);
+	pre();
 	fd(i,vec.size()-1,0){
 		p.ff=vec[i].ff+vec[i].ss.ff-1;
 		p.ss.ff=inf;
@@ -106,7 +113,7 @@ int main(){
 			ans[vec[i].ss.ss]=1;
 		}
 		else{
-			val1=query(i+1,val,0,n-1,1);
+			val1=query(i+1,val);
 			ans[vec[i].ss.ss]=val1.ss-i+ans[vec[val1.ss].ss.ss];
 		}
 	}
