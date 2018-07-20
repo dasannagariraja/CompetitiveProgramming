@@ -1,3 +1,16 @@
+/*
+	Idea:
+		maintain counts of the sizes of teams present.
+		query 1: merge x,y using dsu and update the counts accordingly.
+		query 2: if c>=n, ans=0
+			else if c=0,ans=all possible pairs.
+			else 
+			for each distinct size value i,calculate number of pairs possible
+					=count[i]*(sum of count[j]),such that j>=i+c.
+*/
+
+
+
 //raja1999
 #include <bits/stdc++.h>
 #include <vector>
