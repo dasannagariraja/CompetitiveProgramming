@@ -1,7 +1,7 @@
 /*
 	Idea: Check if its strongly connected.
 		  Find dfs tree,check if the graph has any forward or cross edge.
-		  Check if any node has more than one cheildren with a back edge to the ancestor of it.
+		  Check if any node has more than one children with a back edge to the ancestor of it.
 */
 
 
