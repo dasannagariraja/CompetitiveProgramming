@@ -1,4 +1,14 @@
 /*
+    Idea:
+    Construct the convex hulls of both white and black points.
+    Now just check if they both intersect or not.
+    If they intersect then its not possible to divide them
+    Check if one polygon lies completely inside other,in this
+    case also not possible to divide.
+    In other cases its possible to divide.
+
+*/
+/*
 Geometry Library which has been taken from user @alecsyde on codeforces
 Its awesome
 */
