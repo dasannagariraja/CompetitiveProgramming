@@ -1,4 +1,11 @@
 //raja1999
+
+/*	Idea: compress all the values of leaves to the range [0,n].And maintain a segment tree which has the minimum 
+	absolute difference of  elements present in that range,maximum element present in that range,and minimum element
+	present in the range.
+	Now using dsu on trees,at every time we have all ithe leaves values in its subtree updated in segment tree
+	and get the minimum abolute difference.
+*/
 #include <bits/stdc++.h>
 #include <vector>
 #include <set>
