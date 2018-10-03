@@ -1,12 +1,3 @@
-/*
-	Idea: For every i,we find minimum j such that gcd(a[i],a[j])=1 and j>i and store it as right[i]=j.
-		  Now, for every query we can just find min(right[i]) for all i from l to r.
-		  If min(right[i])<=r then there exists a pair.
-		  For,this we can use segment tree.
-		  For finding right[i],we can do binary search on j from i+1 to n,such that number of coprime
-		  numbers with a[i] from i+1 to j euqals 1;	
-*/ 
-//raja1999
 #include <bits/stdc++.h>
 #include <vector>
 #include <set>
@@ -21,8 +12,8 @@
 #include <queue>
 #include <stack>
 #include <iomanip> 
-//setbase - cout << setbase (16)a; cout << 100 << endl; Prints 64
-//setfill -   cout << setfill ('x') << setw (5); cout << 77 <<endl;prints xxx77
+//setbase - cout << setbase (16); cout << 100 << endl; Prints 64
+//setfill -   cout << setfill ('x') << setw (5); cout << 77 << endl; prints xxx77
 //setprecision - cout << setprecision (14) << f << endl; Prints x.xxxx
 //cout.precision(x)  cout<<fixed<<val;  // prints x digits after decimal in val
 
@@ -49,142 +40,238 @@ using namespace std;
 #define mod (1000*1000*1000+7)
 #define pqueue priority_queue< int >
 #define pdqueue priority_queue< int,vi ,greater< int > >
+#define flush fflush(stdout) 
+#define primeDEN 727999983
+mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
+ 
+template <typename T>
+void printvec(vector<T>& vec){
+	for(int i=0;i<vec.size();i++){
+		cout<<vec[i]<<" ";
+	}
+	cout<<endl;
+}
 
-//std::ios::sync_with_stdio(false);
-vi v;
-vii v1;
-vector<vi>vec(100005),se(500005);
-vi ::iterator it,it1;
-int st[2000005],c[1000006],a[100005],rt[100005];
-vi get(int x){
-	v.clear();
-	while(x>1){
-		v.pb(c[x]);
-		x/=c[x];
-	}
-	sort(all(v));
-	v.resize(unique(v.begin(),v.end())-v.begin());
-	return v;
+pii p;
+int vis[500005],low[500005],AP[500005],par[500005][20],disc[500005],ans[500005],res[500005];
+int lev[500005],u[500005],v[500005],parent[500005],tim=0;
+vector<vi>adj(500005),adj1(500005),tree(500005);
+map<int,int>mapi;
+int counti=0;
+stack<pii>st;
+vector< set<int> >vv(500005);
+int c=0;
+set<int>::iterator it;
+void dfs(int u)
+{
+vis[u]=true;
+int  i;
+low[u]=disc[u]=(++tim);
+int child=0;
+  for(i=0;i<adj[u].size();i++)
+  {
+   int v=adj[u][i];
+   if(vis[v]==false)
+   {
+    child++;
+    parent[v]=u;
+    st.push(mp(u,v));
+    dfs(v);
+
+    low[u]=min(low[u],low[v]);  
+    if( (parent[u]!=-1) and ( low[v]>=disc[u] ) ){
+        p=st.top();
+        while (p.ff != u || p.ss != v) { 
+            //cout << st->back().u << "--" << st->back().v << " ";
+            vv[counti].insert(p.ff);
+            vv[counti].insert(p.ss); 
+            st.pop(); 
+            p=st.top();
+        } 
+        vv[counti].insert(p.ff);
+        vv[counti].insert(p.ss);
+        st.pop();
+        counti++; 
+        AP[u]=true;
+    }
+    else if( (parent[u]==-1) and (child>1)){
+        p=st.top();
+        while (p.ff != u || p.ss != v) { 
+            //cout << st->back().u << "--" << st->back().v << " ";
+            vv[counti].insert(p.ff);
+            vv[counti].insert(p.ss); 
+            st.pop(); 
+            p=st.top();
+        } 
+        vv[counti].insert(p.ff);
+        vv[counti].insert(p.ss);
+        st.pop();
+        counti++; 
+      AP[u]=true;
+    }
+   }
+   else if(v!=parent[u])
+    {low[u]=min(low[u],disc[v]);}
+  }
+
 }
-int add(int mask,int id){
-	int i,res=1;
-	rep(i,v.size()){
-		if(mask&(1<<i)){
-			res*=v[i];
-		}
-	}
-	se[res].pb(id);
-}
-pii gen(int mask,int id){
-	int i,res=1,c=0;
-	rep(i,vec[id].size()){
-		if(mask&(1<<i)){
-			res*=vec[id][i];
-			c++;
-		}
-	}
-	return make_pair(res,c%2);
-}
-int check(int pos,int st){
-	int i,ans=0,val;
-	rep(i,v1.size()){
-		it=upper_bound(se[v1[i].ff].begin(),se[v1[i].ff].end(),st);
-		it1=upper_bound(se[v1[i].ff].begin(),se[v1[i].ff].end(),pos);
-		if(it1!=se[v1[i].ff].begin()){
-			val=(it1-it);
-			if(val>=0){
-				if(v1[i].ss==0){
-					ans-=val;
-				}
-				else{
-					ans+=val;
-				}
-			}
-		}
-	}
- 	return pos-st-ans;
-}
-int build(int s,int e,int node){
-	if(s==e){
-		st[node]=rt[s];
+vi vec;
+int dfs1(int u){
+	vis[u]=1;
+	mapi[u]=c;
+	vec.pb(u);
+	if(AP[u]){
 		return 0;
 	}
-	int mid=(s+e)/2;
-	build(s,mid,2*node);
-	build(mid+1,e,2*node+1);
-	st[node]=min(st[2*node],st[2*node+1]);
-	return 0;
+	//cout<<u+1<<" ";
+	int i;
+	rep(i,adj1[u].size()){
+		if(!vis[adj1[u][i]]){
+			dfs1(adj1[u][i]);
+		}
+	}
 }
-int query(int s,int e,int l,int r,int node){
-	if(l>e||r<s){
-		return inf;
+int dfs2(int u,int p,int prev,int l){
+	par[u][0]=p;
+	int i;
+	lev[u]=l;
+	ans[u]=prev+res[u];
+	rep(i,tree[u].size()){
+		if(tree[u][i]!=p){
+			dfs2(tree[u][i],u,ans[u],l+1);
+		}
 	}
-	if(l<=s&&r>=e){
-		return st[node];
-
+}
+int pre(){
+	int i,j;
+	f(i,1,20){
+		rep(j,c){
+			if(par[j][i-1]==-1){
+				par[j][i]=-1;
+				continue;
+			}
+			par[j][i]=par[par[j][i-1]][i-1];
+		}
 	}
-	int mid=(s+e)/2;
-	return min(query(s,mid,l,r,2*node),query(mid+1,e,l,r,2*node+1));
+}
+int lca(int u,int v){
+	int i;
+	if(lev[u]<lev[v]){
+		swap(u,v);
+	}
+	fd(i,19,0){
+		if(lev[u]-(1<<i)>=lev[v]){
+			u=par[u][i];
+		}
+	}
+	if(u==v){
+		return u;
+	}
+	fd(i,19,0){
+		if(par[u][i]!=par[v][i]){
+			u=par[u][i];
+			v=par[v][i];
+		}
+	}
+	return par[u][0];
 }
 int main(){
-	std::ios::sync_with_stdio(false);
-	int n,m,i,j,k,val1,l,r,lo,hi;
-	pii val;
-	for(i=2;i<=1000005;i++){
-		if(c[i]!=0){
-			continue;
-		}
-		for(j=i;j<=1000005;j+=i){
-			if(c[j]==0){
-				c[j]=i;
-			}
-		}
-	}
-	cin>>n>>m;
-	rep(i,n){
-		cin>>a[i];
-		vec[i]=get(a[i]);
-		j=(1<<vec[i].size());
-		f(k,1,j){
-			add(k,i);
-		}
-	}	
-	int ans;
-	rep(i,n){
-		lo=i+1;
-		hi=n-1;
-		ans=n;
-		v1.clear();
-		j=(1<<vec[i].size());
-		f(k,1,j){
-			val=gen(k,i);
-			v1.pb(val);
-		}
-		while(lo<=hi){
-			int mid=(lo+hi)/2;
-			val1=check(mid,i);
-			if(val1>=1){
-				hi=mid-1;
-				ans=mid;
-			}
-			else{
-				lo=mid+1;
-			}
-		}	
-		rt[i]=ans;
-	}
-	build(0,n-1,1);
-	rep(i,m){
-		cin>>l>>r;
-		l--;
-		r--;
-		val1=query(0,n-1,l,r,1);
-		if(val1<=r){
-			cout<<"S"<<endl;
-		}
-		else{
-			cout<<"N"<<endl;
-		}
-	}
-} 
-	
+    std::ios::sync_with_stdio(false); cin.tie(NULL);
+    int n,q,m,i,u1,v1,val,l,j;
+    cin>>n>>m>>q;
+    rep(i,m){
+    	cin>>u[i]>>v[i];
+    	u[i]--;
+    	v[i]--;
+    	adj[u[i]].pb(v[i]);
+    	adj[v[i]].pb(u[i]);
+    }
+    int fl=0;
+    parent[0]=1;
+    dfs(0);
+    while (!st.empty()) { 
+        //cout << st->back().u << "--" << st->back().v << " ";
+        p=st.top();
+        fl=1;
+        vv[counti].insert(p.ff);
+        vv[counti].insert(p.ss); 
+        st.pop();
+    } 
+    if(fl)
+        counti++;
+    // rep(i,m){
+    // 	if(!AP[u[i]]&&!AP[v[i]]){
+    // 		adj1[u[i]].pb(v[i]);
+    // 		adj1[v[i]].pb(u[i]);
+    // 	}
+
+    // }
+    rep(i,counti){
+        for(it=vv[i].begin();it!=vv[i].end();it++){
+            mapi[*it]=i;
+            //cout<<*it<<" ";
+        }
+        //cout<<endl;
+    }
+    c=i;
+    rep(i,n){
+        if(AP[i]){
+            mapi[i]=c;
+            res[c]=1;
+            c++;
+        }
+    }
+    rep(i,counti){
+        for(it=vv[i].begin();it!=vv[i].end();it++){
+            if(AP[*it]){
+                tree[mapi[*it]].pb(i);
+                tree[i].pb(mapi[*it]);
+            }
+        }
+    }
+    // cout<<counti<<endl;
+    // rep(i,c){
+    //     cout<<tree[i].size()<<endl;
+    //     rep(j,tree[i].size()){
+    //         cout<<tree[i][j]<<" ";
+    //     }
+    //     cout<<endl;
+    // }
+    // cout<<"AEDSSADASD"<<endl;
+    //return 0;
+    rep(i,counti){
+    	vis[i]=0;
+    }
+    dfs2(0,-1,0,0);
+    pre();
+    //return 0;
+   // cout<<ans[0]<<" "<<ans[1]<<" "<<ans[2]<<endl;
+    while(q--){
+    	cin>>u1>>v1;
+    	u1--;
+    	v1--;
+    	if(u1==v1){
+    		cout<<0<<endl;
+    		continue;
+    	}
+    	if(mapi[u1]==mapi[v1]){
+    		cout<<1<<endl;
+    		continue;
+    	}
+    	l=lca(mapi[u1],mapi[v1]);
+    	//cout<<mapi[u1]<<" "<<mapi[v1]<<" "<<l<<endl;
+    	val=ans[mapi[u1]]-ans[l];
+    	val+=ans[mapi[v1]]-ans[l];
+    	val+=res[l]+1;
+        //cout<<val<<endl;
+    	if(AP[u1]){
+            //cout<<"hi"<<endl;
+    		val--;
+    	}
+    	if(AP[v1]){
+    		val--;
+    	}
+    	cout<<val<<endl;
+    }
+    return 0;   
+}
