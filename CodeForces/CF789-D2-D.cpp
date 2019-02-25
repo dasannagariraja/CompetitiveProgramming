@@ -1,4 +1,6 @@
 //raja1999
+
+// Idea: Same as in the editorial, https://codeforces.com/blog/entry/51312
 #include <bits/stdc++.h>
 #include <vector>
 #include <set>
